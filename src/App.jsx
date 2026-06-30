@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Welcome from './views/Welcome'
 import Philosophy from './views/Philosophy'
 import AlertsIntro from './views/AlertsIntro'
@@ -7,6 +7,9 @@ import AlertsConfig from './views/AlertsConfig'
 import Concepts from './views/Concepts'
 import MyRoutines from './views/MyRoutines'
 import RoutineBuilder from './views/RoutineBuilder'
+import Summary from './views/Summary'
+import Execution from './views/Execution'
+import Report from './views/Report'
 
 const ONBOARDING_VIEWS = ['welcome', 'philosophy', 'alerts-intro', 'alerts-demo', 'alerts-config', 'concepts']
 
@@ -25,10 +28,11 @@ function newId(prefix) { return `${prefix}_${idCounter++}` }
 export default function App() {
   const [view, setView] = useState('welcome')
   const [globalInterval, setGlobalInterval] = useState(2)
-  const [catalog, setCatalog] = useState([])     // ActivityCatalog global
-  const [routines, setRoutines] = useState([])   // lista de rutinas
+  const [catalog, setCatalog] = useState([])
+  const [routines, setRoutines] = useState([])
   const [editingRoutineId, setEditingRoutineId] = useState(null)
   const [builderReturnsTo, setBuilderReturnsTo] = useState('my-routines')
+  const [blockLog, setBlockLog] = useState([])
 
   useEffect(() => {
     const done = localStorage.getItem('punctual_onboarding_done')
@@ -42,8 +46,7 @@ export default function App() {
 
   function openNewRoutine() {
     const id = newId('routine')
-    const routine = { id, name: '', activityIds: [] }
-    setRoutines(prev => [...prev, routine])
+    setRoutines(prev => [...prev, { id, name: '', activityIds: [] }])
     setEditingRoutineId(id)
     setBuilderReturnsTo('my-routines')
     setView('routine-builder')
@@ -53,19 +56,37 @@ export default function App() {
     setRoutines(prev => prev.map(r =>
       r.id === routineId ? { ...r, name: name || 'Rutina sin nombre', activityIds } : r
     ))
-    setView(builderReturnsTo === 'my-routines' ? 'my-routines' : 'my-routines')
+    if (builderReturnsTo === 'summary') {
+      setView('summary')
+    } else {
+      setView('my-routines')
+    }
   }
 
   function cancelRoutineBuilder() {
-    // si es nueva rutina, eliminarla
     if (builderReturnsTo === 'my-routines') {
       setRoutines(prev => prev.filter(r => r.id !== editingRoutineId))
     }
-    setView('my-routines')
+    setView(builderReturnsTo === 'summary' ? 'summary' : 'my-routines')
   }
 
   function deleteRoutine(id) {
     setRoutines(prev => prev.filter(r => r.id !== id))
+  }
+
+  function openRoutine(routineId) {
+    setEditingRoutineId(routineId)
+    setView('summary')
+  }
+
+  function startExecution() {
+    setBlockLog([])
+    setView('execution')
+  }
+
+  function onExecutionFinish(log) {
+    setBlockLog(log || [])
+    setView('report')
   }
 
   function addActivityToCatalog(label, options = {}) {
@@ -96,14 +117,17 @@ export default function App() {
     onboardingStep,
     catalog, setCatalog,
     routines, setRoutines,
-    editingRoutineId,
+    editingRoutineId, setEditingRoutineId,
+    builderReturnsTo, setBuilderReturnsTo,
     STANDARD_SUGGESTIONS,
     openNewRoutine,
+    openRoutine,
     saveRoutine,
     cancelRoutineBuilder,
     deleteRoutine,
     addActivityToCatalog,
     updateActivity,
+    startExecution,
   }
 
   return (
@@ -116,6 +140,21 @@ export default function App() {
       {view === 'concepts'         && <Concepts {...shared} />}
       {view === 'my-routines'      && <MyRoutines {...shared} />}
       {view === 'routine-builder'  && <RoutineBuilder {...shared} />}
+      {view === 'summary'          && (
+        <Summary {...shared} startExecution={startExecution} />
+      )}
+      {view === 'execution'        && (
+        <Execution
+          routines={routines}
+          catalog={catalog}
+          editingRoutineId={editingRoutineId}
+          globalInterval={globalInterval}
+          onFinish={onExecutionFinish}
+        />
+      )}
+      {view === 'report'           && (
+        <Report blockLog={blockLog} onDone={() => setView('my-routines')} />
+      )}
     </div>
   )
 }

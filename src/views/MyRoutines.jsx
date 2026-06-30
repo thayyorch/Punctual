@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { BtnPrimary } from '../components/Btn'
 
-export default function MyRoutines({ routines, catalog, openNewRoutine, deleteRoutine }) {
+export default function MyRoutines({ routines, catalog, openNewRoutine, openRoutine, deleteRoutine }) {
   const [showMenu, setShowMenu] = useState(false)
 
   function totalMin(routine) {
@@ -36,11 +36,11 @@ export default function MyRoutines({ routines, catalog, openNewRoutine, deleteRo
           </div>
         ) : (
           routines.map(routine => (
-            <div key={routine.id} style={{
+            <div key={routine.id} onClick={() => openRoutine(routine.id)} style={{
               background: 'var(--bg-card)', border: '1px solid var(--border)',
               borderRadius: 16, padding: '14px 16px', marginBottom: 10,
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              boxShadow: 'var(--card-shadow)'
+              boxShadow: 'var(--card-shadow)', cursor: 'pointer'
             }}>
               <div>
                 <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{routine.name}</div>
@@ -48,7 +48,7 @@ export default function MyRoutines({ routines, catalog, openNewRoutine, deleteRo
                   {routine.activityIds.length} actividades · {totalMin(routine)} min
                 </div>
               </div>
-              <button onClick={() => deleteRoutine(routine.id)} style={{
+              <button onClick={e => { e.stopPropagation(); deleteRoutine(routine.id) }} style={{
                 background: 'var(--bg-elevated)', border: '1px solid var(--border)',
                 color: 'var(--text-dim)', width: 28, height: 28, borderRadius: 8,
                 fontSize: '0.8rem', cursor: 'pointer'
