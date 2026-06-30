@@ -44,8 +44,8 @@ export default function AlertsDemo({ onNext, onboardingStep }) {
 
       if (rem > 0 && rem % 60 === 0) {
         const mins = Math.floor(rem / 60)
-        speak(`Quedan ${mins} minutos para tomar baño.`)
-        setCoachLine(`Quedan ${mins} minutos para tomar baño.`)
+        speak(`Quedan ${mins}.`)
+        setCoachLine(`Quedan ${mins}.`)
       }
 
       if (rem <= 0) {
