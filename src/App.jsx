@@ -25,14 +25,44 @@ const STANDARD_SUGGESTIONS = [
 let idCounter = 1
 function newId(prefix) { return `${prefix}_${idCounter++}` }
 
+// Lee un valor guardado de localStorage, con fallback si no existe o falla el parseo.
+function loadStored(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : fallback
+  } catch (_) {
+    return fallback
+  }
+}
+
+// Al arrancar, recupera el contador de ids para que los nuevos no choquen con los guardados.
+function restoreIdCounter(catalog, routines) {
+  let max = 0
+  for (const item of [...catalog, ...routines]) {
+    const n = parseInt(String(item.id).split('_')[1], 10)
+    if (!isNaN(n) && n > max) max = n
+  }
+  idCounter = max + 1
+}
+
 export default function App() {
   const [view, setView] = useState('welcome')
-  const [globalInterval, setGlobalInterval] = useState(2)
-  const [catalog, setCatalog] = useState([])
-  const [routines, setRoutines] = useState([])
+  const [globalInterval, setGlobalInterval] = useState(() => loadStored('punctual_interval', 2))
+  const [catalog, setCatalog] = useState(() => loadStored('punctual_catalog', []))
+  const [routines, setRoutines] = useState(() => loadStored('punctual_routines', []))
   const [editingRoutineId, setEditingRoutineId] = useState(null)
   const [builderReturnsTo, setBuilderReturnsTo] = useState('my-routines')
   const [blockLog, setBlockLog] = useState([])
+
+  // Restaura el contador de ids una sola vez, con lo que se cargó de localStorage.
+  useEffect(() => {
+    restoreIdCounter(loadStored('punctual_catalog', []), loadStored('punctual_routines', []))
+  }, [])
+
+  // Persiste cada cambio de catálogo, rutinas e intervalo.
+  useEffect(() => { localStorage.setItem('punctual_catalog', JSON.stringify(catalog)) }, [catalog])
+  useEffect(() => { localStorage.setItem('punctual_routines', JSON.stringify(routines)) }, [routines])
+  useEffect(() => { localStorage.setItem('punctual_interval', JSON.stringify(globalInterval)) }, [globalInterval])
 
   useEffect(() => {
     const done = localStorage.getItem('punctual_onboarding_done')

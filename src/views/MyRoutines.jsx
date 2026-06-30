@@ -1,8 +1,19 @@
 import { useState } from 'react'
 import { BtnPrimary } from '../components/Btn'
 
-export default function MyRoutines({ routines, catalog, openNewRoutine, openRoutine, deleteRoutine }) {
+export default function MyRoutines({ routines, catalog, openNewRoutine, openRoutine, deleteRoutine, addActivityToCatalog }) {
   const [showMenu, setShowMenu] = useState(false)
+  const [showNewActivity, setShowNewActivity] = useState(false)
+  const [newActivityLabel, setNewActivityLabel] = useState('')
+
+  function confirmNewActivity() {
+    const label = newActivityLabel.trim()
+    if (!label) return
+    const capitalised = label.charAt(0).toUpperCase() + label.slice(1)
+    addActivityToCatalog(capitalised, { custom: true })
+    setNewActivityLabel('')
+    setShowNewActivity(false)
+  }
 
   function totalMin(routine) {
     return routine.activityIds.reduce((sum, id) => {
@@ -87,7 +98,55 @@ export default function MyRoutines({ routines, catalog, openNewRoutine, openRout
               </div>
             </button>
 
+            <button onClick={() => { setShowMenu(false); setShowNewActivity(true) }} style={{
+              display: 'flex', alignItems: 'flex-start', gap: 14, width: '100%',
+              background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+              borderRadius: 16, padding: 14, marginBottom: 10, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left'
+            }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--triumph-soft-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0 }}>✓</div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: 2 }}>Actividad</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', lineHeight: 1.4 }}>Una sola cosa suelta, como "sacar al perro" — la usas luego en cualquier rutina.</div>
+              </div>
+            </button>
+
             <button onClick={() => setShowMenu(false)} style={{
+              background: 'transparent', border: 'none', color: 'var(--text-dim)',
+              fontSize: '0.88rem', padding: 8, fontFamily: 'inherit', cursor: 'pointer', width: '100%'
+            }}>Cancelar</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal nueva actividad suelta */}
+      {showNewActivity && (
+        <div onClick={() => setShowNewActivity(false)} style={{
+          position: 'fixed', inset: 0, background: 'rgba(5,6,9,0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 80, padding: 24
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: 'var(--bg-card)', borderRadius: 22, padding: '28px 24px',
+            width: 'min(88vw, 360px)', border: '1px solid var(--border)'
+          }}>
+            <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: 4 }}>Nueva actividad</div>
+            <div style={{ color: 'var(--text-dim)', fontSize: '0.82rem', marginBottom: 18 }}>
+              Escríbela como debe sonar cuando te avisemos. Ej: "sacar al perro".
+            </div>
+            <input
+              autoFocus
+              type="text"
+              value={newActivityLabel}
+              onChange={e => setNewActivityLabel(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && confirmNewActivity()}
+              placeholder="ej. sacar al perro"
+              style={{
+                width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+                color: 'var(--text-primary)', borderRadius: 11, padding: '13px 14px',
+                fontSize: '0.95rem', fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box'
+              }}
+            />
+            <BtnPrimary onClick={confirmNewActivity} style={{ marginBottom: 10 }}>Agregar</BtnPrimary>
+            <button onClick={() => setShowNewActivity(false)} style={{
               background: 'transparent', border: 'none', color: 'var(--text-dim)',
               fontSize: '0.88rem', padding: 8, fontFamily: 'inherit', cursor: 'pointer', width: '100%'
             }}>Cancelar</button>
