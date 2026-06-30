@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #FFFFFF;
+  --bg-elevated: #F7F7F8;
+  --bg-card: #FFFFFF;
+  --amber: #F0A03C;
+  --amber-dim: #FCEAD2;
+  --amber-soft-bg: #FDF1E2;
+  --triumph: #5FA864;
+  --triumph-soft-bg: #E8F4E9;
+  --urgent: #E0524A;
+  --urgent-soft-bg: #FBEAE9;
+  --text-primary: #1C1C1E;
+  --text-dim: #8A8A8E;
+  --text-faint: #C7C7CC;
+  --ring-track: #F0EFEE;
+  --border: #ECECEC;
+  --card-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 8px rgba(0,0,0,0.03);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
